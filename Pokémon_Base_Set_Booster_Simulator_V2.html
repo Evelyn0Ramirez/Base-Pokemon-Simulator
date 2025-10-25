@@ -98,7 +98,7 @@
     const imageCache = {};
 
     async function fetchCardImage(name) {
-      // Check localStorage first
+      //check localStorage first
       const cached = localStorage.getItem(name);
       if (cached) {
         imageCache[name] = JSON.parse(cached);
@@ -142,7 +142,7 @@
       const card = await fetchCardImage(randomPokemon);
 
       if (card) {
-        // Show small image first
+        //show small image first
         const img = new Image();
         img.src = card.small;
         img.alt = randomPokemon + " card";
@@ -150,14 +150,14 @@
         document.getElementById('card').innerHTML = "";
         document.getElementById('card').appendChild(img);
 
-        // Preload large image in background
+        //preload large image in background
         const largeImg = new Image();
         largeImg.onload = () => {
           img.src = card.large;
         };
         largeImg.src = card.large;
 
-        // Add to history section
+        //add to history section
         const historyDiv = document.createElement('div');
         historyDiv.classList.add('card-history');
         historyDiv.innerHTML = `<img src="${card.small}" alt="${randomPokemon}"><br>${randomPokemon}`;
@@ -175,7 +175,7 @@
       document.getElementById('history').innerHTML = "";
     }
 
-    // Optional: preload cached images on load for smoother UX
+    //preload cached images on load
     window.addEventListener('load', () => {
       pokemonBaseSet.forEach(name => {
         const cached = localStorage.getItem(name);
@@ -185,3 +185,4 @@
   </script>
 </body>
 </html>
+
