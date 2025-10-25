@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Base Set Booster Simulator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: linear-gradient(135deg, #ffcc00, #0075be);
+      color: #fff;
+      text-align: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 18px;
+      text-shadow: 2px 2px 4px #000;
+    }
+    button {
+      background: #ffcb05;
+      border: 2px solid #2a75bb;
+      color: #2a75bb;
+      font-size: 14px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      margin: 5px;
+    }
+    button:hover {
+      background: #2a75bb;
+      color: white;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      text-shadow: 2px 2px 4px #000;
+    }
+    #card img {
+      width: 220px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      transition: 0.3s ease-in-out;
+    }
+    #history {
+      margin-top: 40px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+    .card-history {
+      background: rgba(0,0,0,0.5);
+      padding: 8px;
+      border-radius: 8px;
+      text-align: center;
+      width: 100px;
+      font-size: 10px;
+    }
+    .card-history img {
+      width: 100%;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pokémon Base Set Booster Simulator (1–69)</h1>
+  <div>
+    <button onclick="getRandomPokemon()">🎲 Draw a Pokémon</button>
+    <button onclick="resetSimulator()">🔁 Reset</button>
+  </div>
+  <div id="result"></div>
+  <div id="card"></div>
+  <h2>🃏 Your Pulls</h2>
+  <div id="history"></div>
+
+  <script>
+    const pokemonBaseSet = [
+      "Alakazam", "Blastoise", "Chansey", "Charizard", "Clefairy", "Gyarados", "Hitmonchan", "Machamp", "Magneton",
+      "Mewtwo", "Nidoking", "Ninetales", "Poliwrath", "Raichu", "Venusaur", "Zapdos", "Beedrill", "Dragonair",
+      "Dugtrio", "Electabuzz", "Electrode", "Pidgeotto", "Arcanine", "Charmeleon", "Dewgong", "Dratini", "Farfetch’d",
+      "Growlithe", "Haunter", "Ivysaur", "Jynx", "Kadabra", "Kakuna", "Machoke", "Magikarp", "Magmar", "Nidorino",
+      "Poliwhirl", "Porygon", "Raticate", "Seel", "Wartortle", "Abra", "Bulbasaur", "Caterpie", "Charmander", "Diglett",
+      "Doduo", "Drowzee", "Gastly", "Koffing", "Machop", "Magnemite", "Metapod", "Nidoran♂", "Onix", "Pidgey",
+      "Pikachu", "Poliwag", "Ponyta", "Rattata", "Sandshrew", "Squirtle", "Starmie", "Staryu", "Tangela", "Voltorb",
+      "Vulpix", "Weedle"
+    ];
+
+    let remainingPokemon = [...pokemonBaseSet];
+    let history = [];
+    const imageCache = {};
+
+    async function fetchCardImage(name) {
+      // Check localStorage first
+      const cached = localStorage.getItem(name);
+      if (cached) {
+        imageCache[name] = JSON.parse(cached);
+        return imageCache[name];
+      }
+
+      try {
+        const response = await fetch(`https://api.pokemontcg.io/v2/cards?q=name:${encodeURIComponent(name)} set.name:"Base"`);
+        const data = await response.json();
+
+        if (data.data && data.data.length > 0) {
+          const card = data.data[0];
+          const cardInfo = {
+            small: card.images.small,
+            large: card.images.large
+          };
+          imageCache[name] = cardInfo;
+          localStorage.setItem(name, JSON.stringify(cardInfo));
+          return cardInfo;
+        }
+      } catch (e) {
+        console.error("Error fetching", e);
+      }
+      return null;
+    }
+
+    async function getRandomPokemon() {
+      if (remainingPokemon.length === 0) {
+        alert("🎉 You’ve pulled every Pokémon! Resetting the deck...");
+        resetSimulator();
+        return;
+      }
+
+      const randomIndex = Math.floor(Math.random() * remainingPokemon.length);
+      const randomPokemon = remainingPokemon.splice(randomIndex, 1)[0];
+      history.push(randomPokemon);
+
+      document.getElementById('result').innerText = "🎉 " + randomPokemon + "!";
+      document.getElementById('card').innerHTML = "Loading card...";
+
+      const card = await fetchCardImage(randomPokemon);
+
+      if (card) {
+        // Show small image first
+        const img = new Image();
+        img.src = card.small;
+        img.alt = randomPokemon + " card";
+        img.loading = "lazy";
+        document.getElementById('card').innerHTML = "";
+        document.getElementById('card').appendChild(img);
+
+        // Preload large image in background
+        const largeImg = new Image();
+        largeImg.onload = () => {
+          img.src = card.large;
+        };
+        largeImg.src = card.large;
+
+        // Add to history section
+        const historyDiv = document.createElement('div');
+        historyDiv.classList.add('card-history');
+        historyDiv.innerHTML = `<img src="${card.small}" alt="${randomPokemon}"><br>${randomPokemon}`;
+        document.getElementById('history').appendChild(historyDiv);
+      } else {
+        document.getElementById('card').innerHTML = "❌ No image found.";
+      }
+    }
+
+    function resetSimulator() {
+      remainingPokemon = [...pokemonBaseSet];
+      history = [];
+      document.getElementById('result').innerText = "";
+      document.getElementById('card').innerHTML = "";
+      document.getElementById('history').innerHTML = "";
+    }
+
+    // Optional: preload cached images on load for smoother UX
+    window.addEventListener('load', () => {
+      pokemonBaseSet.forEach(name => {
+        const cached = localStorage.getItem(name);
+        if (cached) imageCache[name] = JSON.parse(cached);
+      });
+    });
+  </script>
+</body>
+</html>
