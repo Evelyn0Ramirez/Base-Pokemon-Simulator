@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Base Set Generator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background-color: #ffffff;
+      color: #000;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #currentPokemon {
+      font-size: 20px;
+      margin: 20px 0;
+      padding: 15px 20px;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .pokeball-btn {
+      position: relative;
+      width: 150px;
+      height: 60px;
+      border: 4px solid #000;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, #ff0000 50%, #fff 50%);
+      cursor: pointer;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      color: #000;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .pokeball-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      background-color: #fff;
+      border: 4px solid #000;
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .pokeball-btn:hover {
+      transform: scale(1.05);
+    }
+
+    #history {
+      background: #f0f0f0;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      text-align: left;
+      color: #000;
+      max-width: 400px;
+      margin: 0 auto 20px auto;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pokémon Base Set Generator</h1>
+
+  <div id="currentPokemon">No Pokémon generated yet!</div>
+
+  <div id="buttons">
+    <button class="pokeball-btn" id="generateBtn">Generate</button>
+  </div>
+
+  <div id="history">
+    <h2>History</h2>
+    <ul id="pokemonList"></ul>
+  </div>
+
+  <div id="resetButtonContainer">
+    <button class="pokeball-btn" id="resetBtn">Reset</button>
+  </div>
+
+  <script>
+    const pokemon = [
+      "Alakazam", "Blastoise", "Chansey", "Charizard", "Clefairy", "Gyarados",
+      "Hitmonchan", "Machamp", "Magneton", "Mewtwo", "Nidoking", "Ninetales",
+      "Poliwrath", "Raichu", "Venusaur", "Zapdos", "Beedrill", "Dragonair",
+      "Dugtrio", "Electabuzz", "Electrode", "Pidgeotto", "Arcanine", "Charmeleon",
+      "Dewgong", "Dratini", "Farfetch’d", "Growlithe", "Haunter", "Ivysaur",
+      "Jynx", "Kadabra", "Kakuna", "Machoke", "Magikarp", "Magmar", "Nidorino",
+      "Poliwhirl", "Porygon", "Raticate", "Seel", "Wartortle", "Abra", "Bulbasaur",
+      "Caterpie", "Charmander", "Diglett", "Doduo", "Drowzee", "Gastly", "Koffing",
+      "Machop", "Magnemite", "Metapod", "Nidoran♂", "Onix", "Pidgey", "Pikachu",
+      "Poliwag", "Ponyta", "Rattata", "Sandshrew", "Squirtle", "Starmie", "Staryu",
+      "Tangela", "Voltorb", "Vulpix", "Weedle"
+    ];
+
+    const generateBtn = document.getElementById('generateBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const pokemonList = document.getElementById('pokemonList');
+    const currentPokemonDiv = document.getElementById('currentPokemon');
+
+    let remaining = [...pokemon];
+    let history = [];
+
+    generateBtn.addEventListener('click', () => {
+      if (remaining.length === 0) {
+        alert("All 69 Pokémon have been generated!");
+        return;
+      }
+
+      const randomIndex = Math.floor(Math.random() * remaining.length);
+      const selectedPokemon = remaining.splice(randomIndex, 1)[0];
+      const pokemonNumber = pokemon.indexOf(selectedPokemon) + 1;
+
+      history.push({ number: pokemonNumber, name: selectedPokemon });
+
+      currentPokemonDiv.textContent = `#${pokemonNumber} ${selectedPokemon}`;
+
+      const li = document.createElement('li');
+      li.textContent = `#${pokemonNumber} ${selectedPokemon}`;
+      pokemonList.appendChild(li);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (confirm("Are you sure you want to reset?")) {
+        remaining = [...pokemon];
+        history = [];
+        pokemonList.innerHTML = '';
+        currentPokemonDiv.textContent = "No Pokémon generated yet!";
+      }
+    });
+  </script>
+</body>
+</html>
